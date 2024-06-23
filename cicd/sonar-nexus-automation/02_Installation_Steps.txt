@@ -1,0 +1,157 @@
+Automate this using Ansible, once everything is done.
+
+Installing Jenkins:
+
+sudo apt update
+
+apt-cache search openjdk | grep openjdk-17
+sudo apt-get install openjdk-17-jdk
+
+In order install Jenkins:
+
+curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | sudo tee   /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]   https://pkg.jenkins.io/debian binary/ | sudo tee   /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt-get update
+sudo apt-get install jenkins
+
+to check if its working:
+
+sudo systemctl status jenkins
+
+go to the browser and put the below URL
+
+http://192.168.0.112:8080/login?from=%2F
+
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+============================
+
+Installing SonarQube
+
+apt install unzip
+adduser sonarqube
+
+su sonarqube
+
+cd /opt
+
+wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.4.0.54424.zip
+unzip *
+chmod -R 755 /home/sonarqube/sonarqube-9.4.0.54424
+chown -R sonarqube:sonarqube /home/sonarqube/sonarqube-9.4.0.54424
+cd sonarqube-9.4.0.54424/bin/linux-x86-64/
+./sonar.sh start
+
+
+http://192.168.0.112:9000/
+
+default creds admin : admin
+======
+
+https://www.fosstechnix.com/how-to-install-nexus-repository-on-ubuntu/
+
+Nexus Repository installation:
+
+cd /opt
+
+sudo apt-get install openjdk-11-jdk
+
+
+sudo wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+
+
+
+
+sudo wget  https://download.sonatype.com/nexus/3/nexus-3.69.0-02-java11-unix.tar.gz
+
+tar -xf latest-unix.tar.gz
+
+sudo mv /opt/nexus-3.69.0-02 nexus
+
+sudo adduser nexus
+
+sudo visudo
+
+nexus ALL=(ALL) NOPASSWD: ALL
+
+ctrl + X
+
+sudo chown -R nexus:nexus /opt/nexus
+sudo chown -R nexus:nexus /opt/sonatype-work/
+
+sudo vim /opt/nexus/bin/nexus.rc
+
+run_as_user="nexus"
+
+ sudo vim /opt/nexus/bin/nexus.vmoptions
+ 
+-Xms1024m
+-Xmx1024m
+-XX:MaxDirectMemorySize=1024m
+
+
+sudo vim /etc/systemd/system/nexus.service
+
+[Unit]
+Description=nexus service
+After=network.target
+
+[Service]
+Type=forking
+LimitNOFILE=65536
+ExecStart=/opt/nexus/bin/nexus start
+ExecStop=/opt/nexus/bin/nexus stop
+User=nexus
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+
+
+sudo systemctl start nexus
+sudo systemctl enable nexus
+sudo systemctl status nexus
+
+It failed to start and the error was
+
+nexus.service: Main process exited, code=exited, status=1/FAILURE
+
+The error was with the JDK version. I was using JDK 17 and it was supporting JDK 8 and JDK 11.
+nly v
+After resolving the error, it throws another error where it is accessible only with localhost
+.
+
+It worked after enabling the port 8081
+
+sudo ufw allow 8081
+sudo ufw enable
+
+==
+
+run sonarqube as a service
+
+sudo vim /etc/systemd/system/sonarqube.service
+
+[Unit]
+Description=sonarqube service
+After=network.target
+
+[Service]
+Type=forking
+LimitNOFILE=65536
+ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
+ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
+User=sonarqube
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl start sonarqube
+sudo systemctl status sonarqube
+
+=======================
+
+installing maven
+
+sudo wget https://dlcdn.apache.org/maven/maven-3/3.9.8/binaries/apache-maven-3.9.8-bin.tar.gz

@@ -1,0 +1,106 @@
+After logged in to Jenkins,
+
+Configure the tools path,
+
+use which command
+
+which java --> you get the path
+
+like JDK home
+git
+maven
+
+install maven in opt folder
+
+sudo wget url
+sudo mv apace-mav--- maven
+
+take the path and configure it in jenkins
+
+Create key in master
+
+ssh-keygen -t rsa
+
+generates a public key and private key.
+
+you can go to slave machine.
+
+check if .ssh folder exists
+
+either copy paste the pub key by logging in to the slave machine
+
+or
+
+do
+
+ssh-copy-id boss@192.168.0.116
+it will automatically copies it.
+
+---------------
+
+add new node
+
+node name
+
+To make slave node with static ip
+
+sudo vim /etc/netplan/01-netcfg.yaml
+
+network:
+  version: 2
+  ethernets:
+    enp0s3:
+      dhcp4: no
+      addresses:
+        - 192.168.0.116/24
+      routes:
+        - to: default
+          via: 192.168.0.1
+      nameservers:
+        addresses:
+          - 8.8.8.8
+          - 8.8.4.4
+
+sudo netplan apply
+
+create dir /var/jenkins
+
+create credentials 
+
+with ssh-username-with private key
+
+and update the username and private key
+
+---
+
+issue occured while adding the agent
+
+it worked afte i connected to the slave machine and created the jenkins user
+
+like 
+
+sudo su -
+useradd -d /var/lib/jenkins jenkins
+
+create the directory
+create the .ssh directory
+create the authorized_key
+
+
+---
+
+in jenkins master machine, generate the ssh key
+ssh-keygen -t rsa
+
+copy this public key and paste it in the slave var/lib/jenkins/.ssh/authorized_key
+
+then it should work.
+
+jdk is required in slave machine
+
+so
+
+sudo apt install openjdk-17-jdk
+
+now it works..
+

@@ -1,0 +1,8 @@
+Problem Statement:
+
+When the code is committed to the Github, the CICD pipeline has to 
+1. Update the Pom ,Checkout the code.
+2. Maven build
+3. Sonar code coverage
+4. Upload the war file in Nexus repository
+5. Build a docker image and put it in aws ecr
