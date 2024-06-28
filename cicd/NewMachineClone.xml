@@ -1,0 +1,41 @@
+HeadMaster : 131
+physics: 132
+maths: 133
+
+New Machine Clone:
+
+sudo hostnamectl set-hostname maths
+
+sudo systemctl stop nexus
+sudo systemctl status nexus
+sudo systemctl disable nexus
+
+sudo systemctl rm -rf /etc/systemd/system/nexus.service
+
+
+sudo rm -rf /opt/*
+
+sudo userdel nexus
+sudo systemctl daemon-reload
+sudo systemctl list-units --type=service
+
+==============================
+
+sudo vim /etc/netplan/01-netcfg.yaml
+
+network:
+  version: 2
+  ethernets:
+    enp0s3:
+      dhcp4: no
+      addresses:
+        - 192.168.0.131/24
+      routes:
+        - to: default
+          via: 192.168.0.1
+      nameservers:
+        addresses:
+          - 8.8.8.8
+          - 8.8.4.4
+
+sudo netplan apply
