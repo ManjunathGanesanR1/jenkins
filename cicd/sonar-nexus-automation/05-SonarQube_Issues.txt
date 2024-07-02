@@ -1,0 +1,142 @@
+SonarQube Issues:
+
+2024.07.01 05:19:43 WARN  web[][o.s.c.a.AnnotationConfigApplicationContext] Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'jdk.internal.loader.ClassLoaders$AppClassLoader@8bcc55f-org.sonar.server.platform.db.EmbeddedDatabaseFactory': Initialization of bean failed; nested exception is java.lang.IllegalStateException: Unable to start database
+2024.07.01 05:19:43 ERROR web[][o.s.s.p.PlatformImpl] Web server startup failed
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'jdk.internal.loader.ClassLoaders$AppClassLoader@8bcc55f-org.sonar.server.platform.db.EmbeddedDatabaseFactory': Initialization of bean failed; nested exception is java.lang.IllegalStateException: Unable to start database
+
+=====================
+
+
+2024.07.01 05:58:17 INFO  app[][o.s.a.AppFileSystem] Cleaning or creating temp directory /opt/sonarqube/temp
+
+File permssion issue in temp directory.
+
+
+H2 DB issue:
+
+ org.h2.jdbc.JdbcSQLNonTransientConnectionException: File corrupted while reading record: null. Possible solution: use the recovery tool [90030-210]
+ 
+ ================
+ 
+ Better we will integrate with MySql db
+ 
+ sudo apt update
+ sudo apt install mysql-server
+sudo mysql -u root -p
+password root
+
+create user 'sonarqube' identified by 'root';
+create database sonarqube
+
+sudo ufw allow 3306
+sudo ufw enable
+
+
+
+cd
+
+sonar.jdbc.url=jdbc:mysql://localhost:3306/sonarqube?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useConfigs=maxPerformance
+
+mysql driver didn't work.
+
+so uninstall mysql
+
+clean up 
+
+#!/bin/bash
+
+# Step 1: Stop MySQL Service
+sudo systemctl stop mysql
+
+# Step 2: Remove MySQL Packages and Dependencies
+sudo apt-get remove --purge mysql-server mysql-client mysql-common -y
+sudo apt-get autoremove -y
+sudo apt-get autoclean
+
+# Step 3: Delete MySQL Data Directory (Optional)
+sudo rm -rf /var/lib/mysql/
+
+# Step 4: Remove MySQL Configuration Files (Optional)
+sudo rm -rf /etc/mysql/
+
+# Step 5: Purge MySQL from System
+sudo apt-get purge mysql-server mysql-client mysql-common mysql-server-core-* mysql-client-core-* -y
+
+# Step 6: Verify Removal
+sudo systemctl status mysql
+
+echo "MySQL has been successfully uninstalled."
+
+
+===============================
+
+Installing Postgres sql
+
+#!/bin/bash
+
+# Step 1: Update Package List
+sudo apt update
+
+# Step 2: Install PostgreSQL
+sudo apt install -y postgresql postgresql-contrib
+
+# Step 3: Verify Installation and Check Service Status
+sudo systemctl status postgresql
+
+# Step 4: Access PostgreSQL and Set Password (Optional)
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'root';"
+
+# Step 5: Create a New PostgreSQL User (Optional)
+# Replace 'myuser' and 'mypassword' with your desired username and password
+sudo -u postgres psql -c "CREATE USER sonarqube WITH SUPERUSER PASSWORD 'root';"
+
+# Step 6: Exit PostgreSQL Prompt and Logout from 'postgres' User
+sudo -u postgres psql -c "\q"
+exit
+
+
+sudo -u postgres psql -c "ALTER USER sonarqube SET search_path to public;"
+
+sudo su postgres
+psql
+
+CREATE DATABASE sonarqube;
+SELECT usename FROM pg_user;
+SELECT * FROM pg_user;
+GRANT ALL PRIVILEGES ON DATABASE sonarqube TO sonarqube;
+
+
+
+cd /opt/sonarqube/conf
+
+sudo vim sonar.properties	
+
+# The schema must be created first.
+sonar.jdbc.username=sonarqube
+sonar.jdbc.password=root
+sonar.jdbc.url=jdbc:postgresql://localhost/public
+
+ 
+ Now its working
+ 
+
+=========
+
+error:
+
+ERROR: [1] bootstrap checks failed. You must address the points described in the following [1] lines before starting Elasticsearch.
+bootstrap check failure [1] of [1]: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
+
+to see all variables.
+
+sudo sysctl -a 
+
+
+sysctl -w vm.max_map_count=262144
+is correct, however, the setting will only last for the duration of the session. If the host reboots, the setting will be reset to the original value.
+
+If you want to set this permanently, you need to edit /etc/sysctl.conf and set vm.max_map_count to 262144.
+
+When the host reboots, you can verify that the setting is still correct by running sysctl vm.max_map_count
+
+Now its working.

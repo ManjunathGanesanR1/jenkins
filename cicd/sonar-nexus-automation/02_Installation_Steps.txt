@@ -35,9 +35,11 @@ su sonarqube
 
 cd /opt
 
-wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.4.0.54424.zip
+
 unzip *
-chmod -R 755 /home/sonarqube/sonarqube-9.4.0.54424
+sudo rm -rf sonarqube-9.4.0.54424.zip
+sudo mv sonarqube-9.4.0.54424 sonarqube
+
 chown -R sonarqube:sonarqube /home/sonarqube/sonarqube-9.4.0.54424
 cd sonarqube-9.4.0.54424/bin/linux-x86-64/
 ./sonar.sh start
@@ -45,7 +47,54 @@ cd sonarqube-9.4.0.54424/bin/linux-x86-64/
 
 http://192.168.0.112:9000/
 
+
+sudo ufw status
+sudo ufw allow 9000
+sudo ufw enable
+
+
 default creds admin : admin
+updated creds admin : root
+
+==
+
+run sonarqube as a service
+
+sudo vim /etc/systemd/system/sonarqube.service
+
+[Unit]
+Description=sonarqube service
+After=network.target
+
+[Service]
+Type=forking
+LimitNOFILE=65536
+ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
+ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
+User=sonarqube
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl enable sonarqube
+sudo systemctl start sonarqube
+sudo systemctl status sonarqube
+
+=======================
+
+installing maven
+
+sudo wget https://dlcdn.apache.org/maven/maven-3/3.9.8/binaries/apache-maven-3.9.8-bin.tar.gz
+
+unzip
+
+export M2_HOME=/opt/maven
+export PATH=$PATH:$M2_HOME
+
+add this in jenkins configuration also.
+
+
 ======
 
 https://www.fosstechnix.com/how-to-install-nexus-repository-on-ubuntu/
@@ -126,32 +175,15 @@ It worked after enabling the port 8081
 sudo ufw allow 8081
 sudo ufw enable
 
-==
 
-run sonarqube as a service
 
-sudo vim /etc/systemd/system/sonarqube.service
+================
 
-[Unit]
-Description=sonarqube service
-After=network.target
 
-[Service]
-Type=forking
-LimitNOFILE=65536
-ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
-ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
-User=sonarqube
-Restart=on-abort
+installing Sonar Scanner CLI
 
-[Install]
-WantedBy=multi-user.target
+sudo wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.1.0.4477-linux-x64.zip
 
-sudo systemctl start sonarqube
-sudo systemctl status sonarqube
+unzip
 
-=======================
-
-installing maven
-
-sudo wget https://dlcdn.apache.org/maven/maven-3/3.9.8/binaries/apache-maven-3.9.8-bin.tar.gz
+mv sonar-scanner-cli-6.1.0.4477-linux-x64 sonar-scanner

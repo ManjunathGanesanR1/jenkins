@@ -1,0 +1,61 @@
+Configurations:
+
+Manage Jenkins -> configurations --> add sonar scanner configurations
+
+add Sonar scanner.
+------
+
+Login it Sonar Qube,
+Administration --> security --> create token
+
+730e268ef9247ad2a9e5ea9d928becc9670437c8
+
+add this token to Jenkins configurations --> SonarQube Servers
+
+==========
+
+
+install jdk 11 for sonar scanner
+sudo apt install openjdk-11-jdk
+/usr/lib/jvm/java-11-openjdk-amd64/bin
+
+if you need update the default jdk then,
+
+sudo update-alternatives --install /usr/bin/java java /path/to/java 1
+sudo update-alternatives --install /usr/bin/javac javac /path/to/javac 1
+==========
+
+
+properties:
+
+# Project identification
+sonar.projectKey=service-registry
+sonar.projectName=Service Registry
+sonar.projectVersion=1.0
+sonar.sources=src
+sonar.java.binaries=target
+
+--
+
+I have added jdk11 in tools --> add jdk --> path for jdk11
+
+----
+
+The Jenkins server is going down.
+
+token: 0c76daf2f7ad285fcfd4967d11f7ae05b5c383a5
+
+mvn sonar:sonar -Dsonar.login=0c76daf2f7ad285fcfd4967d11f7ae05b5c383a5 -Dsonar.host.url=http://192.168.0.113:9000
+
+This Worked and  created code coverage
+
+================
+
+Now time to upload the jar to Nexus Repository.
+
+add a plugin : nexus artifact uploader
+
+create a repository in Nexus,
+
+Create repository --> Maven2 --> project name --> mixed Artifacts --> hosted.
+
